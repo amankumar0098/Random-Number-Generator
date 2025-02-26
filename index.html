@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Random Number Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.2.0/math.js"></script>
+  
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .selection-screen {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .type-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .type-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .type-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .type-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .generator-panel {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            word-break: break-all;
+        }
+
+        .history {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced Random Number Generator</h1>
+        
+        <!-- Selection Screen -->
+        <div class="selection-screen" id="selection-screen">
+            <div class="type-card" onclick="showGenerator('integer')">
+                <h3>Integer</h3>
+                <p>Generate whole numbers within a specified range</p>
+            </div>
+            <div class="type-card" onclick="showGenerator('decimal')">
+                <h3>Decimal</h3>
+                <p>Generate numbers with customizable decimal places</p>
+            </div>
+            <div class="type-card" onclick="showGenerator('fraction')">
+                <h3>Fraction</h3>
+                <p>Generate random fractions with decimal equivalents</p>
+            </div>
+            <div class="type-card" onclick="showGenerator('complex')">
+                <h3>Complex</h3>
+                <p>Generate numbers with real and imaginary parts</p>
+            </div>
+        </div>
+
+        <!-- Integer Generator -->
+        <div class="generator-panel" id="integer-panel">
+            <button class="back-button" onclick="showSelectionScreen()">← Back to Selection</button>
+            <h2>Integer Generator</h2>
+            <div class="input-group">
+                <label for="int-min">Minimum:</label>
+                <input type="number" id="int-min" value="1">
+                <label for="int-max">Maximum:</label>
+                <input type="number" id="int-max" value="100">
+            </div>
+            <button onclick="generateInteger()">Generate Integer</button>
+            <div id="int-result" class="result">Result will appear here</div>
+            <div id="int-history" class="history">Previous: </div>
+        </div>
+
+        <!-- Decimal Generator -->
+        <div class="generator-panel" id="decimal-panel">
+            <button class="back-button" onclick="showSelectionScreen()">← Back to Selection</button>
+            <h2>Decimal Generator</h2>
+            <div class="input-group">
+                <label for="dec-min">Minimum:</label>
+                <input type="number" id="dec-min" value="0" step="0.1">
+                <label for="dec-max">Maximum:</label>
+                <input type="number" id="dec-max" value="1" step="0.1">
+                <label for="dec-precision">Decimal Places:</label>
+                <input type="number" id="dec-precision" value="2" min="1" max="10">
+            </div>
+            <button onclick="generateDecimal()">Generate Decimal</button>
+            <div id="dec-result" class="result">Result will appear here</div>
+            <div id="dec-history" class="history">Previous: </div>
+        </div>
+
+        <!-- Fraction Generator -->
+        <div class="generator-panel" id="fraction-panel">
+            <button class="back-button" onclick="showSelectionScreen()">← Back to Selection</button>
+            <h2>Fraction Generator</h2>
+            <div class="input-group">
+                <label for="frac-max-num">Max Numerator:</label>
+                <input type="number" id="frac-max-num" value="10">
+                <label for="frac-max-den">Max Denominator:</label>
+                <input type="number" id="frac-max-den" value="10">
+            </div>
+            <button onclick="generateFraction()">Generate Fraction</button>
+            <div id="frac-result" class="result">Result will appear here</div>
+            <div id="frac-history" class="history">Previous: </div>
+        </div>
+
+        <!-- Complex Generator -->
+        <div class="generator-panel" id="complex-panel">
+            <button class="back-button" onclick="showSelectionScreen()">← Back to Selection</button>
+            <h2>Complex Number Generator</h2>
+            <div class="input-group">
+                <label for="complex-max-real">Max Real Part:</label>
+                <input type="number" id="complex-max-real" value="10">
+                <label for="complex-max-imag">Max Imaginary Part:</label>
+                <input type="number" id="complex-max-imag" value="10">
+            </div>
+            <button onclick="generateComplex()">Generate Complex Number</button>
+            <div id="complex-result" class="result">Result will appear here</div>
+            <div id="complex-history" class="history">Previous: </div>
+        </div>
+    </div>
+
+    <script>
+        function showGenerator(type) {
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById(`${type}-panel`).style.display = 'block';
+        }
+
+        function showSelectionScreen() {
+            document.querySelectorAll('.generator-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            document.getElementById('selection-screen').style.display = 'grid';
+        }
+
+        function updateHistory(type, value) {
+            const historyElement = document.getElementById(`${type}-history`);
+            const currentHistory = historyElement.textContent.replace('Previous: ', '');
+            const historyArray = currentHistory ? currentHistory.split(', ') : [];
+            historyArray.unshift(value);
+            if (historyArray.length > 3) historyArray.pop();
+            historyElement.textContent = 'Previous: ' + historyArray.join(', ');
+        }
+
+        function generateInteger() {
+            const min = parseInt(document.getElementById('int-min').value);
+            const max = parseInt(document.getElementById('int-max').value);
+            const result = Math.floor(Math.random() * (max - min + 1)) + min;
+            document.getElementById('int-result').textContent = result;
+            updateHistory('int', result);
+        }
+
+        function generateDecimal() {
+            const min = parseFloat(document.getElementById('dec-min').value);
+            const max = parseFloat(document.getElementById('dec-max').value);
+            const precision = parseInt(document.getElementById('dec-precision').value);
+            const result = (Math.random() * (max - min) + min).toFixed(precision);
+            document.getElementById('dec-result').textContent = result;
+            updateHistory('dec', result);
+        }
+
+        function generateFraction() {
+            const maxNum = parseInt(document.getElementById('frac-max-num').value);
+            const maxDen = parseInt(document.getElementById('frac-max-den').value);
+            const numerator = Math.floor(Math.random() * maxNum) + 1;
+            const denominator = Math.floor(Math.random() * maxDen) + 1;
+            const fraction = math.fraction(numerator, denominator);
+            const result = `${fraction.n}/${fraction.d} (≈ ${(numerator/denominator).toFixed(3)})`;
+            document.getElementById('frac-result').textContent = result;
+            updateHistory('frac', result);
+        }
+
+        function generateComplex() {
+            const maxReal = parseFloat(document.getElementById('complex-max-real').value);
+            const maxImag = parseFloat(document.getElementById('complex-max-imag').value);
+            const realPart = (Math.random() * 2 - 1) * maxReal;
+            const imagPart = (Math.random() * 2 - 1) * maxImag;
+            const result = `${realPart.toFixed(2)} ${imagPart >= 0 ? '+' : ''} ${imagPart.toFixed(2)}i`;
+            document.getElementById('complex-result').textContent = result;
+            updateHistory('complex', result);
+        }
+    </script>
+</body>
+</html>
